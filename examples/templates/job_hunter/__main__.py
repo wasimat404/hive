@@ -106,23 +106,25 @@ def tui(mock, verbose, debug):
         tool_executor = agent._tool_registry.get_executor()
         graph = agent._build_graph()
 
+        entry_point_specs = [
+            EntryPointSpec(
+                id="start",
+                name="Start Job Hunt",
+                entry_node="intake",
+                trigger_type="manual",
+                isolation_level="isolated",
+            ),
+        ]
         runtime = AgentHost(
             graph=graph,
             goal=agent.goal,
             storage_path=storage_path,
-            entry_points=[
-                EntryPointSpec(
-                    id="start",
-                    name="Start Job Hunt",
-                    entry_node="intake",
-                    trigger_type="manual",
-                    isolation_level="isolated",
-                ),
-            ],
             llm=llm,
             tools=tools,
             tool_executor=tool_executor,
         )
+        for spec in entry_point_specs:
+            runtime.register_entry_point(spec)
 
         await runtime.start()
 

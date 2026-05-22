@@ -149,19 +149,19 @@ class TwitterNewsAgent:
         tools = list(self._tool_registry.get_tools().values())
         tool_executor = self._tool_registry.get_executor()
         self._graph = self._build_graph()
+        entry_point_specs = [
+            EntryPointSpec(
+                id="default",
+                name="Default",
+                entry_node=self.entry_node,
+                trigger_type="manual",
+                isolation_level="shared",
+            )
+        ]
         self._agent_runtime = AgentHost(
             graph=self._graph,
             goal=self.goal,
             storage_path=self._storage_path,
-            entry_points=[
-                EntryPointSpec(
-                    id="default",
-                    name="Default",
-                    entry_node=self.entry_node,
-                    trigger_type="manual",
-                    isolation_level="shared",
-                )
-            ],
             llm=llm,
             tools=tools,
             tool_executor=tool_executor,
@@ -172,6 +172,8 @@ class TwitterNewsAgent:
                 async_checkpoint=True,
             ),
         )
+        for spec in entry_point_specs:
+            self._agent_runtime.register_entry_point(spec)
 
     async def start(self):
         if self._agent_runtime is None:
